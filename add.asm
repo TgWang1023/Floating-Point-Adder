@@ -38,16 +38,16 @@ MYADD:
     srl $s7, $s1, 31 # $s7 = num2 sign
     blt	$s2, $s3, move_num_one
 move_num_two: # $s2 >= $s3
-    sub $t1, $s2, $s3
-    srlv $s3, $t0, $t1
+    sub $t0, $s2, $s3
+    srlv $s5, $s5, $t0
     move $s3, $s2
     j mantissa
 move_num_one: # $s2 < $s3
-    sub $t1, $s3, $s2
-    srlv $s4, $t0, $t1
+    sub $t0, $s3, $s2
+    srlv $s4, $s4, $t0
     move $s2, $s3
 mantissa:
-    
+
     jr $ra
 exit:
     lw $ra, 32($sp)
