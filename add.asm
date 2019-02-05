@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float 12.5
-    B: .float -3.5
+    A: .float 12.0
+    B: .float 12.0
     C: .float 0.0
 .text
 main:
@@ -56,8 +56,6 @@ addition:
 extra_bit_check:
     li $t0, 0x01000000 # check bit25
     and $t0, $s4, $t0
-    li $t1, 0x00FFFFFF
-    and $s4, $s4, $t1
     bne $t0, $zero, incre_expo
     j loop
 diff_sign:
@@ -74,6 +72,7 @@ num_two_big:
     move $s0, $s1 # num2 sign dominate
     j extra_bit_check
 incre_expo:
+    srl $s4, $s4, 1
     addi $s2, $s2, 1 # adding 1 to the final result exponent
 loop:
     li $t0, 0x00800000
