@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float 2.25
-    B: .float -4.25
+    A: .float 12.5
+    B: .float -3.5
     C: .float 0.0
 .text
 main:
