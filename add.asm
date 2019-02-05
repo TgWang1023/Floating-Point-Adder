@@ -55,6 +55,8 @@ addition:
     add $s4, $s4, $s5
     li $t0, 0x01000000 # check bit25
     and $t0, $s4, $t0
+    li $t1, 0x00FFFFFF
+    and $s4, $s4, $t1
     bne $t0, $zero, incre_expo
     j loop
 diff_sign:
@@ -65,14 +67,15 @@ loop:
     li $t0, 0x00800000
     and $t0, $t0, $s4
     bne $t0, $zero, result
+    beq $s4, $zero, result
     sll $s4, $s4, 1
     addi $s2, $s2, -1
     j loop
 result:
     move $t0, $s0
-    sll $t0, 31
+    sll $t0, $t0, 31
     move $t1, $s2
-    sll $t1, 23
+    sll $t1, $t1, 23
     or $t0, $t0, $t1
     move $t2, $s4
     sll $t2, $t2, 9
