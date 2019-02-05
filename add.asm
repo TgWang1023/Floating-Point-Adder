@@ -30,10 +30,10 @@ MYADD:
     srl $t0, $s1, 23
     andi $s3, $t0, 0x00FF # $s3 = num2 exponent
     # mantissas
-    li $t1, 0x00800000 # bit 24 is 1
+    li $t1, 0x00800000 # bit24 is 1
     sll $t0, $s0, 9
     srl $s4, $t0, 9 
-    or $s4, $s4, $t1 # $s4 = num1 mantissa, bit24 = hidden 1, bit25 = potential overflow
+    or $s4, $s4, $t1 # $s4 = num1 mantissa, final result mantissa, bit24 = hidden 1, bit25 = potential overflow
     sll $t0, $s1, 9
     srl $s5, $t0, 9 
     or $s5, $s5, $t1 # $s5 = num2 mantissa , bit24 = hidden 1, bit25 = potential overflow
@@ -52,8 +52,33 @@ move_num_one: # $s2 < $s3
     move $s2, $s3
 addition:
     bne $s0, $s1, diff_sign
+    add $s4, $s4, $s5
+    li $t0, 0x01000000 # check bit25
+    and $t0, $s4, $t0
+    bne $t0, $zero, incre_expo
+    j loop
 diff_sign:
+incre_expo:
+    addi $s2, $s2, 1 # adding 1 to the final result exponent
+    j loop
+loop:
+    li $t0, 0x00800000
+    and $t0, $t0, $s4
+    bne $t0, $zero, result
+    sll $s4, $s4, 1
+    addi $s2, $s2, -1
+    j loop
 result:
+    move $t0, $s0
+    sll $t0, 31
+    move $t1, $s2
+    sll $t1, 23
+    or $t0, $t0, $t1
+    move $t2, $s4
+    sll $t2, $t2, 9
+    srl $t2, $t2, 9
+    or $t0, $t0, $t2
+    move $v0, $t0
     jr $ra
 exit:
     lw $ra, 24($sp)
