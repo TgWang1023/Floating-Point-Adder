@@ -73,6 +73,8 @@ num_two_big:
     j extra_bit_check
 incre_expo:
     srl $s4, $s4, 1
+    li $t0, 0x00FE
+    bge $s2, $t0, overflow
     addi $s2, $s2, 1 # adding 1 to the final result exponent
 loop:
     li $t0, 0x00800000
@@ -80,8 +82,17 @@ loop:
     bne $t0, $zero, result
     beq $s4, $zero, result
     sll $s4, $s4, 1
+    li $t0, 0x0001
+    ble $s2, $t0, underflow
     addi $s2, $s2, -1
     j loop
+overflow:
+    li $s2, 0x00FF
+    li $s4, 0
+    j result
+underflow:
+    li $v0, 0
+    jr $ra
 result:
     move $t0, $s0
     sll $t0, $t0, 31
