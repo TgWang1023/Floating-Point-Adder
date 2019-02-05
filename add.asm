@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float 12.5
-    B: .float 3.5
+    A: .float 2.25
+    B: .float -4.25
     C: .float 0.0
 .text
 main:
@@ -53,6 +53,7 @@ move_num_one: # $s2 < $s3
 addition:
     bne $s0, $s1, diff_sign
     add $s4, $s4, $s5
+extra_bit_check:
     li $t0, 0x01000000 # check bit25
     and $t0, $s4, $t0
     li $t1, 0x00FFFFFF
@@ -60,9 +61,20 @@ addition:
     bne $t0, $zero, incre_expo
     j loop
 diff_sign:
+    bgt $s4, $s5, num_one_big # num1 mantissa > num2 mantissa
+    blt $s4, $s5, num_two_big # num1 mantissa < num2 mantissa
+    li $v0, 0 # num1 mantissa = num2 mantissa
+    jr $ra
+num_one_big:
+    sub $s4, $s4, $s5
+    move $s1, $s0 # num1 sign dominate
+    j extra_bit_check
+num_two_big:
+    sub $s4, $s5, $s4
+    move $s0, $s1 # num2 sign dominate
+    j extra_bit_check
 incre_expo:
     addi $s2, $s2, 1 # adding 1 to the final result exponent
-    j loop
 loop:
     li $t0, 0x00800000
     and $t0, $t0, $s4
