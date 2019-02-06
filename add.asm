@@ -43,13 +43,33 @@ MYADD:
     blt	$s2, $s3, move_num_one
 move_num_two: # $s2 >= $s3
     sub $t0, $s2, $s3
+    li $t1, 32
+    sub $t1, $t1, $t0
+    sllv $t2, $s5, $t1
     srlv $s5, $s5, $t0
     move $s3, $s2
+    li $t3, 0x80000000
+    and $t3, $t3, $t2 # $t3 = round bit
+    li $t4, 0x7FFFFFFF
+    and $t4, $t4, $t2 # $t4 = sticky bits
+    beq $t3, $zero, addition
+    beq $t4, $zero, addition
+    addi $s5, $s5, 1
     j addition
 move_num_one: # $s2 < $s3
     sub $t0, $s3, $s2
+    li $t1, 32
+    sub $t1, $t1, $t0
+    sllv $t2, $s4, $t1
     srlv $s4, $s4, $t0
     move $s2, $s3
+    li $t3, 0x80000000
+    and $t3, $t3, $t2 # $t3 = round bit
+    li $t4, 0x7FFFFFFF
+    and $t4, $t4, $t2 # $t4 = sticky bits
+    beq $t3, $zero, addition
+    beq $t4, $zero, addition
+    addi $s4, $s4, 1
 addition:
     bne $s0, $s1, diff_sign
     add $s4, $s4, $s5
