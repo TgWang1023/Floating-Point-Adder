@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float 12.0
-    B: .float 12.0
+    A: .float 0.0000000000000000000000000000000000001
+    B: .float -0.00000000000000000000000000000000000009
     C: .float 0.0
 .text
 main:
@@ -12,10 +12,6 @@ main:
     jal MYADD
     la $t2, C
     sw $v0, 0($t2) # $v0 = result
-    # print the result as an integer
-    move $a0, $v0
-    li $v0, 1
-    syscall
     j exit
 MYADD:
     addi $sp, $sp, -28
