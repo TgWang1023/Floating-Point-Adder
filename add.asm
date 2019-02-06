@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float 0.0000000000000000000000000000000000001
-    B: .float -0.00000000000000000000000000000000000009
+    A: .float -0.0
+    B: .float 2.25
     C: .float 0.0
 .text
 main:
@@ -24,6 +24,11 @@ MYADD:
     sw $ra, 24($sp)
     move $s0, $a0
     move $s1, $a1
+    # check for 0
+    sll $t0, $s0, 1
+    beq $t0, $zero, first_zero
+    sll $t1, $s1, 1
+    beq $t1, $zero, second_zero
     # exponents
     srl $t0, $s0, 23
     andi $s2, $t0, 0x00FF # $s2 = num1 exponent, final result exponent
@@ -135,6 +140,12 @@ restore_register:
     lw $s0, 0($sp)
     addi $sp, $sp, 28
     jr $ra
+first_zero:
+    move $v0, $s1
+    j restore_register
+second_zero:
+    move $v0, $s0
+    j restore_register
 exit:
     li $v0, 10
     syscall
