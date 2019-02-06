@@ -5,6 +5,19 @@
     C: .float 0.0
 .text
 main:
+    la $t0, A
+    lw $a0, 0($t0) # num1 argument
+    la $t1, B
+    lw $a1, 0($t1) # num2 argument
+    jal MYADD
+    la $t2, C
+    sw $v0, 0($t2) # $v0 = result
+    # print the result as an integer
+    move $a0, $v0
+    li $v0, 1
+    syscall
+    j exit
+MYADD:
     addi $sp, $sp, -28
     sw $s0, 0($sp)
     sw $s1, 4($sp)
@@ -13,15 +26,6 @@ main:
     sw $s4, 16($sp)
     sw $s5, 20($sp)
     sw $ra, 24($sp)
-    la $t0, A
-    lw $a0, 0($t0) # num1 argument
-    la $t1, B
-    lw $a1, 0($t1) # num2 argument
-    jal MYADD
-    la $t2, C
-    sw $v0, 0($t2) # $v0 = result
-    j exit
-MYADD:
     move $s0, $a0
     move $s1, $a1
     # exponents
@@ -82,7 +86,7 @@ diff_sign:
     bgt $s4, $s5, num_one_big # num1 mantissa > num2 mantissa
     blt $s4, $s5, num_two_big # num1 mantissa < num2 mantissa
     li $v0, 0 # num1 mantissa = num2 mantissa
-    jr $ra
+    j restore_register
 num_one_big:
     sub $s4, $s4, $s5
     move $s1, $s0 # num1 sign dominate
@@ -112,7 +116,7 @@ overflow:
     j result
 underflow:
     li $v0, 0
-    jr $ra
+    j restore_register
 result:
     move $t0, $s0
     sll $t0, $t0, 31
@@ -124,8 +128,8 @@ result:
     srl $t2, $t2, 9
     or $t0, $t0, $t2
     move $v0, $t0
-    jr $ra
-exit:
+    j restore_register
+restore_register:
     lw $ra, 24($sp)
     lw $s5, 20($sp)
     lw $s4, 16($sp)
@@ -134,5 +138,7 @@ exit:
     lw $s1, 4($sp)
     lw $s0, 0($sp)
     addi $sp, $sp, 28
+    jr $ra
+exit:
     li $v0, 10
     syscall
