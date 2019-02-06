@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float -0.0
-    B: .float 2.25
+    A: .float -2.25
+    B: .float 4.25
     C: .float 0.0
 .text
 main:
@@ -49,6 +49,7 @@ MYADD:
 move_num_two: # $s2 >= $s3
     sub $t0, $s2, $s3
     li $t1, 32
+    bgt $t0, $t1, shift_too_much_two
     sub $t1, $t1, $t0
     sllv $t2, $s5, $t1
     srlv $s5, $s5, $t0
@@ -61,9 +62,13 @@ move_num_two: # $s2 >= $s3
     beq $t4, $zero, addition
     addi $s5, $s5, 1
     j addition
+shift_too_much_two:
+    li $s5, 0
+    j addition
 move_num_one: # $s2 < $s3
     sub $t0, $s3, $s2
     li $t1, 32
+    bgt $t0, $t1, shift_too_much_one
     sub $t1, $t1, $t0
     sllv $t2, $s4, $t1
     srlv $s4, $s4, $t0
@@ -75,6 +80,9 @@ move_num_one: # $s2 < $s3
     beq $t3, $zero, addition
     beq $t4, $zero, addition
     addi $s4, $s4, 1
+    j addition
+shift_too_much_one:
+    li $s4, 0
 addition:
     bne $s0, $s1, diff_sign
     add $s4, $s4, $s5
