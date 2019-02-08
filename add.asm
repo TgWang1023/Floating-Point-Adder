@@ -1,7 +1,7 @@
 # Tiange Wang Lab02. ID: 3717659
 .data
-    A: .float -2.25
-    B: .float 4.25
+    A: .float 100000000000000000000000000000000000000.0
+    B: .float 50000000000000000000000000000000000000.0
     C: .float 0.0
 .text
 main:
@@ -58,9 +58,6 @@ move_num_two: # $s2 >= $s3
     and $t3, $t3, $t2 # $t3 = round bit
     li $t4, 0x7FFFFFFF
     and $t4, $t4, $t2 # $t4 = sticky bits
-    beq $t3, $zero, addition
-    beq $t4, $zero, addition
-    addi $s5, $s5, 1
     j addition
 shift_too_much_two:
     li $s5, 0
@@ -77,13 +74,11 @@ move_num_one: # $s2 < $s3
     and $t3, $t3, $t2 # $t3 = round bit
     li $t4, 0x7FFFFFFF
     and $t4, $t4, $t2 # $t4 = sticky bits
-    beq $t3, $zero, addition
-    beq $t4, $zero, addition
-    addi $s4, $s4, 1
     j addition
 shift_too_much_one:
     li $s4, 0
 addition:
+    li $t7, 0
     bne $s0, $s1, diff_sign
     add $s4, $s4, $s5
 extra_bit_check:
@@ -92,6 +87,7 @@ extra_bit_check:
     bne $t0, $zero, incre_expo
     j loop
 diff_sign:
+    li $t7, 1
     bgt $s4, $s5, num_one_big # num1 mantissa > num2 mantissa
     blt $s4, $s5, num_two_big # num1 mantissa < num2 mantissa
     li $v0, 0 # num1 mantissa = num2 mantissa
@@ -105,6 +101,9 @@ num_two_big:
     move $s0, $s1 # num2 sign dominate
     j extra_bit_check
 incre_expo:
+    move $t4, $t3
+    li $t6, 0x00000001
+    and $t3, $s4, $t6
     srl $s4, $s4, 1
     li $t0, 0x00FE
     bge $s2, $t0, overflow
@@ -122,11 +121,31 @@ loop:
 overflow:
     li $s2, 0x00FF
     li $s4, 0
-    j result
+    j actual
 underflow:
     li $v0, 0
     j restore_register
 result:
+    beq $t7, 0, plus
+    beq $t3, $zero, actual
+    addi $s4, $s4, -1
+    li $t0, 0x01000000
+    and $t0, $t0, $s4
+    beq $t0, $zero, actual
+    li $t0, 0x00FE
+    bge $s2, $t0, overflow
+    addi $s2, $s2, 1 # adding 1 to the final result exponent
+plus:
+    beq $t3, $zero, actual
+    beq $t4, $zero, actual
+    addi $s4, $s4, 1
+    li $t0, 0x01000000
+    and $t0, $t0, $s4
+    beq $t0, $zero, actual
+    li $t0, 0x00FE
+    bge $s2, $t0, overflow
+    addi $s2, $s2, 1 # adding 1 to the final result exponent 
+actual:
     move $t0, $s0
     sll $t0, $t0, 31
     move $t1, $s2
